@@ -52,6 +52,7 @@ const getImgUrl = (main, desc, daytime) => {
 			url += '50'
 	}
 	/*
+	// changes icon by time (contrast suffers)
 	if (daytime) {
 		url += 'd'
 	} else {
