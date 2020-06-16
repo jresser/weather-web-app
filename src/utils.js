@@ -1,18 +1,13 @@
-export const getApiUrl = (lat, long, metric, city) => {
+export const getApiUrl = (lat, lon, metric) => {
   let units
   if (metric) {
     units = 'metric'
   } else {
     units = 'imperial'
-  }
-  if (city === 'Current Location') {
-	  return 'https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon='
-      + long + '&units=' + units + '&appid=' + process.env.REACT_APP_API_KEY
-  } else {
-    const cityName = city.substring(0, city.indexOf(','))
-    return 'https://api.openweathermap.org/data/2.5/weather?q=' + cityName + 
-      '&units=' + units + '&appid=' + process.env.REACT_APP_API_KEY
-  }
+	}
+	return 'https://api.openweathermap.org/data/2.5/onecall?lat=' + lat + '&lon=' 
+		+ lon + '&exclude=minutely,hourly&units=' + units + '&appid=' + 
+		process.env.REACT_APP_API_KEY
 }
 
 export const getImgUrl = (main, desc) => {

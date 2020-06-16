@@ -5,59 +5,33 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
 import defaultIcon from './assets/default_icon.png'
 import { getApiUrl, getImgUrl } from './utils'
-import cityList from './city_list'
+import cityDict from './city_list'
 
+const cityList = Object.keys(cityDict).sort()
 cityList.unshift('Current Location')
 
 const App = () => {
-	const [position, setPosition] = useState({coords: {latitude: '', longitude: ''}});
 	const [city, setCity] = useState('Current Location')
-	const [positionName, setPositionName] = useState('')
 	const [imgUrl, setImgUrl] = useState(`url(${defaultIcon})`)
 	const [day, setDay] = useState(true)
 	const [units, setUnits] = useState('F')
 
 	const [tempStr, setTempStr] = useState('')
 	const [weatherStr, setWeatherStr] = useState('')
+	const [posStr, setPosStr] = useState('')
 
 	const unitOptions = ['F', 'C']
-/*
-	useEffect(() => {
-		if (!gotPosition && position.coords.latitude !== '') {
-			const hour = new Date().getHours()
-			if (hour >= 6 && hour <= 21) {
-				setDay(true)
-			} else {
-				setDay(false)
-			}
-			const metric = units === 'C'
-			fetch(getApiUrl(position.coords.latitude, position.coords.longitude, metric))
-				.then((res) => res.json())
-				.then((res) => {
-					setPositionName(res.name)
-					setWeatherStr(res.weather[0].main)
-					setImgUrl(getImgUrl(res.weather[0].main, res.weather[0].description, day))
-					setTempStr(res.main.temp.toFixed(1) + ' \u00b0' + units)
-				})
-				.catch((err) => console.log(err))
-			setGotPosition(true)
-		}
-	});
-	*/
 
-	const handleSubmit = (e) => {
-		e.preventDefault()
-		const metric = units === 'C'
-		fetch(getApiUrl(position.coords.latitude, position.coords.longitude, metric, city))
+	const getWeather = (latitude, longitude, metric) => {
+		fetch(getApiUrl(latitude, longitude, metric))
 			.then((res) => res.json())
 			.then((res) => {
-				setPositionName(res.name)
-				setWeatherStr(res.weather[0].main)
-				setImgUrl(getImgUrl(res.weather[0].main, res.weather[0].description))
-				setTempStr(res.main.temp.toFixed(1) + ' \u00b0' + units)
+				setWeatherStr(res.current.weather[0].main)
+				setImgUrl(getImgUrl(res.current.weather[0].main, res.current.weather[0].description))
+				setTempStr(res.current.temp.toFixed(1) + ' \u00b0' + units)
 				const localDate = new Date()
 				const UTCseconds = (localDate.getTime() + localDate.getTimezoneOffset() * 60 * 1000) / 1000;
-				const unixTime = UTCseconds + res.timezone
+				const unixTime = UTCseconds + res.timezone_offset
 				const date = new Date(unixTime * 1000)
 				const hour = date.getHours()
 				if (hour >= 6 && hour <= 20) {
@@ -69,11 +43,19 @@ const App = () => {
 			.catch((err) => console.log(err))
 	}
 
-
-	if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(setPosition);
-	} else {
-		return <h1>Location not available</h1>
+	const handleSubmit = (e) => {
+		e.preventDefault()
+		const metric = units === 'C'
+		setPosStr(city)
+		if (city === 'Current Location') {
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition((pos) => getWeather(
+					pos.coords.latitude, pos.coords.longitude, metric), 
+					(err) => console.log(err));
+			}
+		} else {
+			getWeather(cityDict[city].lat, cityDict[city].lon, metric)
+		}
 	}
 
 	return (
@@ -98,7 +80,7 @@ const App = () => {
 				</Row>
 				</Form.Group>
 			</Form>
-			<h1>{positionName}</h1>
+			<h1>{posStr}</h1>
 			<h3>{tempStr}</h3>
 			<h3>{weatherStr}</h3>
 			<img src={imgUrl} alt={weatherStr} />
