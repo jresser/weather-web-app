@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Form, Button, Row, Col, Card, CardDeck } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './App.css'
@@ -18,27 +18,62 @@ const App = () => {
 
 	const [tempStr, setTempStr] = useState('')
 	const [weatherStr, setWeatherStr] = useState('')
-	const [posStr, setPosStr] = useState('')
+	const [posStr, setPosStr] = useState('Select a Location and click "Get Weather" to begin!')
+
+	const [forecasts, setForecasts] = useState([])
 
 	const unitOptions = ['F', 'C']
+	const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+		'Friday', 'Saturday']
+
+	useEffect(() => {
+		console.log(forecasts)
+	})
+
+	const setCurrentWeather = (res) => {
+		setWeatherStr(res.current.weather[0].main)
+		setImgUrl(getImgUrl(res.current.weather[0].main, res.current.weather[0].description))
+		setTempStr(res.current.temp.toFixed(1) + ' \u00b0' + units)
+
+		const localDate = new Date()
+		const UTCseconds = (localDate.getTime() + localDate.getTimezoneOffset() * 60 * 1000) / 1000;
+		const unixTime = UTCseconds + res.timezone_offset
+		const date = new Date(unixTime * 1000)
+		const hour = date.getHours()
+		if (hour >= 6 && hour <= 20) {
+			setDay(true)
+		} else {
+			setDay(false)
+		}
+	}
+
+	const setForecast = (res) => {
+		let newForecasts = []
+		for (let i = 0; i < 8 && i < res.daily.length; i++) {
+			if (i === 0) continue
+			const data = res.daily[i]
+			let forecast = {}
+			forecast.min = data.temp.min
+			forecast.max = data.temp.max
+			forecast.main = data.weather[0].main
+			forecast.desc = data.weather[0].description
+
+			const localDate = new Date()
+			const UTCseconds = (localDate.getTime() + localDate.getTimezoneOffset() * 60 * 1000) / 1000;
+			const unixTime = UTCseconds + res.timezone_offset
+			const date = new Date(unixTime * 1000)
+			forecast.dayStr =  daysOfWeek[(date.getDay() + i) % 7]
+			newForecasts.push(forecast)
+		}
+		setForecasts(newForecasts)
+	}
 
 	const getWeather = (latitude, longitude, metric) => {
 		fetch(getApiUrl(latitude, longitude, metric))
 			.then((res) => res.json())
 			.then((res) => {
-				setWeatherStr(res.current.weather[0].main)
-				setImgUrl(getImgUrl(res.current.weather[0].main, res.current.weather[0].description))
-				setTempStr(res.current.temp.toFixed(1) + ' \u00b0' + units)
-				const localDate = new Date()
-				const UTCseconds = (localDate.getTime() + localDate.getTimezoneOffset() * 60 * 1000) / 1000;
-				const unixTime = UTCseconds + res.timezone_offset
-				const date = new Date(unixTime * 1000)
-				const hour = date.getHours()
-				if (hour >= 6 && hour <= 20) {
-					setDay(true)
-				} else {
-					setDay(false)
-				}
+				setCurrentWeather(res)
+				setForecast(res)
 			})
 			.catch((err) => console.log(err))
 	}
@@ -83,7 +118,22 @@ const App = () => {
 			<h1>{posStr}</h1>
 			<h3>{tempStr}</h3>
 			<h3>{weatherStr}</h3>
-			<img src={imgUrl} alt={weatherStr} />
+			<img width='150px' height='150px' src={imgUrl} alt={weatherStr} />
+			<div style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
+				<CardDeck>
+					{forecasts.map((e, i) => 
+						<Card text={day ? 'dark' : 'light'} bg={day ? 'light' : 'dark'} key={i}>
+							<Card.Img variant="top" src={getImgUrl(e.main, e.desc)} />
+							<Card.Body>
+								<Card.Title>{e.dayStr}</Card.Title>
+								<Card.Text>
+									High: {e.max} Low: {e.min}
+								</Card.Text>
+							</Card.Body>
+						</Card>
+					)}
+				</CardDeck>
+			</div>
 		</div>
 	);
 }
