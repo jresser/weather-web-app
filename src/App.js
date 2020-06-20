@@ -18,7 +18,7 @@ const App = () => {
 
 	const [tempStr, setTempStr] = useState('')
 	const [weatherStr, setWeatherStr] = useState('')
-	const [posStr, setPosStr] = useState('Select a Location and click "Get Weather" to begin!')
+	const [posStr, setPosStr] = useState('Click "Get Weather" to begin!')
 
 	const [forecasts, setForecasts] = useState([])
 
@@ -32,11 +32,13 @@ const App = () => {
 
 	const setCurrentWeather = (res) => {
 		setWeatherStr(res.current.weather[0].main)
-		setImgUrl(getImgUrl(res.current.weather[0].main, res.current.weather[0].description))
+		setImgUrl(getImgUrl(res.current.weather[0].main,
+            res.current.weather[0].description))
 		setTempStr(res.current.temp.toFixed(1) + ' \u00b0' + units)
 
 		const localDate = new Date()
-		const UTCseconds = (localDate.getTime() + localDate.getTimezoneOffset() * 60 * 1000) / 1000;
+		const UTCseconds = (localDate.getTime() +
+            localDate.getTimezoneOffset() * 60 * 1000) / 1000;
 		const unixTime = UTCseconds + res.timezone_offset
 		const date = new Date(unixTime * 1000)
 		const hour = date.getHours()
@@ -59,7 +61,8 @@ const App = () => {
 			forecast.desc = data.weather[0].description
 
 			const localDate = new Date()
-			const UTCseconds = (localDate.getTime() + localDate.getTimezoneOffset() * 60 * 1000) / 1000;
+			const UTCseconds = (localDate.getTime() +
+                localDate.getTimezoneOffset() * 60 * 1000) / 1000;
 			const unixTime = UTCseconds + res.timezone_offset
 			const date = new Date(unixTime * 1000)
 			forecast.dayStr =  daysOfWeek[(date.getDay() + i) % 7]
@@ -85,7 +88,7 @@ const App = () => {
 		if (city === 'Current Location') {
 			if (navigator.geolocation) {
 				navigator.geolocation.getCurrentPosition((pos) => getWeather(
-					pos.coords.latitude, pos.coords.longitude, metric), 
+					pos.coords.latitude, pos.coords.longitude, metric),
 					(err) => console.log(err));
 			}
 		} else {
@@ -100,13 +103,17 @@ const App = () => {
 				<Form.Group>
 				<Row>
 					<Col xs={2}>
-						<Form.Control size="lg" as="select" value={units} onChange={e => setUnits(e.target.value)}>
-							{unitOptions.map((e, i) => <option key={i}>{e}</option>)}
+						<Form.Control size="lg" as="select" value={units}
+                            onChange={e => setUnits(e.target.value)}>
+							{unitOptions.map((e, i) =>
+                            <option key={i}>{e}</option>)}
 						</Form.Control>
 					</Col>
 					<Col>
-						<Form.Control size="lg" as="select" value={city} onChange={e => setCity(e.target.value)}>
-							{cityList.map((e, i) => <option key={i}>{e}</option>)}
+						<Form.Control size="lg" as="select" value={city}
+                            onChange={e => setCity(e.target.value)}>
+							{cityList.map((e, i) =>
+                            <option key={i}>{e}</option>)}
 						</Form.Control>
 					</Col>
 					<Col xs={2}>
@@ -119,11 +126,14 @@ const App = () => {
 			<h3>{tempStr}</h3>
 			<h3>{weatherStr}</h3>
 			<img width='150px' height='150px' src={imgUrl} alt={weatherStr} />
-			<div style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
+			<div style={{display: 'flex', flexDirection: 'row',
+                flexWrap: 'wrap'}}>
 				<CardDeck>
-					{forecasts.map((e, i) => 
-						<Card text={day ? 'dark' : 'light'} bg={day ? 'light' : 'dark'} key={i}>
-							<Card.Img variant="top" src={getImgUrl(e.main, e.desc)} />
+					{forecasts.map((e, i) =>
+						<Card text={day ? 'dark' : 'light'}
+                            bg={day ? 'light' : 'dark'} key={i}>
+							<Card.Img variant="top"
+                            src={getImgUrl(e.main, e.desc)} />
 							<Card.Body>
 								<Card.Title>{e.dayStr}</Card.Title>
 								<Card.Text>

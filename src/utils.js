@@ -5,8 +5,8 @@ export const getApiUrl = (lat, lon, metric) => {
   } else {
     units = 'imperial'
 	}
-	return 'https://api.openweathermap.org/data/2.5/onecall?lat=' + lat + '&lon=' 
-		+ lon + '&exclude=minutely,hourly&units=' + units + '&appid=' + 
+	return 'https://api.openweathermap.org/data/2.5/onecall?lat=' + lat +
+        '&lon=' + lon + '&exclude=minutely,hourly&units=' + units + '&appid=' +
 		process.env.REACT_APP_API_KEY
 }
 
@@ -28,8 +28,9 @@ export const getImgUrl = (main, desc) => {
 		case 'Rain':
 			if (desc === 'freezing rain') {
 				url += '13'
-			} else if (desc === 'light intensity shower rain' || desc === 'shower rain'
-				|| desc === 'heavy intensity shower rain' || desc === 'ragged shower rain') {
+			} else if (desc === 'light intensity shower rain' ||
+                desc === 'shower rain' || desc === 'heavy intensity shower rain'
+                || desc === 'ragged shower rain') {
 				url += '09'
 			} else {
 				url += '10'
